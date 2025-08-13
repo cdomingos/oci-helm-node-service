@@ -17,6 +17,7 @@ env:
   exportedVariables:
     - BUILDRUN_HASH
     - HELM_VERSION
+    - chartVersion
 
 steps:
   - type: Command
@@ -27,11 +28,14 @@ steps:
       echo "BUILDRUN_HASH: " $BUILDRUN_HASH
 
   - type: Command
-    name: "Define unique version for Helm"
-    timeoutInSeconds: 40
-    command: |
-      export HELM_VERSION=`echo 0.1.0-${BUILDRUN_HASH}`
-      echo "HELM_VERSION: " $HELM_VERSION
+      name: "Define unique version for Helm"
+      timeoutInSeconds: 40
+      command: |
+        SAFE_HASH=$(echo "${BUILDRUN_HASH}" | tr -cd '[:alnum:].-')
+        export chartVersion="0.1.0+${SAFE_HASH}"
+        echo "Chart version set to: $chartVersion"
+        export HELM_VERSION="${chartVersion}"
+        echo "HELM_VERSION: " $HELM_VERSION
       
   - type: Command
     timeoutInSeconds: 600
